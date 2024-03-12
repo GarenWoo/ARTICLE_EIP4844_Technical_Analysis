@@ -305,7 +305,7 @@ def point_evaluation_precompile(input: Bytes) -> Bytes:
     return Bytes(U256(FIELD_ELEMENTS_PER_BLOB).to_be_bytes32() + U256(BLS_MODULUS).to_be_bytes32())
 ```
 
-返回值为返回 **`FIELD_ELEMENTS_PER_BLOB`** 和 **`BLS_MODULUS`**，这两个值被填充为 bytes32 **大端序**的格式。
+返回 **`FIELD_ELEMENTS_PER_BLOB`** 和 **`BLS_MODULUS`**，这两个值被填充为 bytes32 **大端序**的格式。
 
 **预编译**必须拒绝**非规范字段元素**（即**提供的字段元素必须严格小于** **`BLS_MODULUS`**）。
 
