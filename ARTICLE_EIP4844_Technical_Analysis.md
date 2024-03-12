@@ -91,7 +91,7 @@ EIP-4844 被用于提高可扩展性和效率，扩容方案被称为 "Proto-Dan
       - `max_priority_fee_per_gas`：最大优先费用（小费）。
       - `max_fee_per_gas`：最大总费用（包括基础费用）每单位 gas 。
       - `gas_limit`：交易可使用的最大gas 量。
-      - `value`：以 wei 为单位的发送的以太币数量**。**
+      - `value`：以 wei 为单位的发送的以太币数量。
       - `data`：交易的输入数据。
       - `access_list`：一个访问列表，包括交易执行过程中需要访问的**地址**和**存储键**，以优化 gas 消耗和提高交易执行效率。
 
@@ -148,7 +148,7 @@ blob 交易的发送者对交易数据进行的数字签名，先将 `BLOB_TX_TY
 `blob_base_fee = MIN_BLOB_BASE_FEE * e**(excess_blob_gas / BLOB_BASE_FEE_UPDATE_FRACTION)`
 
 - `MIN_BLOB_BASE_FEE`：此 **EIP** 新增常量，表示最小的 blob gas 单价，为固定值 1 wei。
-- excess_blob_gas` 是“从此 **EIP** 实施后至今各区块 **blob gas** 的消耗量”相比“**目标 blob gas 数量**”多出的 **blob gas** 数量的加总，是整个网络全局的累积值。与 **EIP-1559** 类似，它是一个自我修正公式：随着超额费用增加，`blob_base_fee` 呈**指数**增长，减少使用量并最终迫使超额费用回落。` 
+- `excess_blob_gas` 是“从此 EIP 实施后至今各区块 **blob gas** 的消耗量”相比“**目标 blob gas 数量**”多出的 **blob gas** 数量的加总，是整个网络全局的累积值。与 **EIP-1559** 类似，它是一个自我修正公式：随着超额费用增加，`blob_base_fee` 呈**指数**增长，减少使用量并最终迫使超额费用回落。` 
 - `BLOB_BASE_FEE_UPDATE_FRACTION`是新增的常量，值为 3338477 ，是 blob 基础费更新的分数值，用于调整交易费用。
 - 指数计算通过方法 {**fake_exponential**} 来近似实现。
 
@@ -245,13 +245,13 @@ def calc_excess_blob_gas(parent: Header) -> int:
 
 **与 blob 数据哈希计算相关的新增常量**：
 
-- ### `HASH_OPCODE_BYTE`：对 blob 数据哈希计算的操作码，为固定值 `bytes1(0x49)`。
+- `HASH_OPCODE_BYTE`：对 blob 数据哈希计算的操作码，为固定值 `bytes1(0x49)`。
 
 - `HASH_OPCODE_GAS`：blob 数据哈希计算所对应的 gas 消耗量，为固定值 3 。
 
-我们添加一条指令 `BLOBHASH`（操作码为 `HASH_OPCODE_BYTE`），该指令从**堆栈**顶部读取 `index` 为**大端序（big-endian）**格式的 `uint256`，如果 `index < len(tx.blob_versioned_hashes)` ，则在堆栈上用 `tx.blob_versioned_hashes[index]` 替换它，否则栈顶被替换为全零的 `bytes32` 值。该操作码的 gas 成本为 `HASH_OPCODE_GAS`。
+我们添加一条指令 `BLOBHASH`（操作码为 `HASH_OPCODE_BYTE`），该指令从**堆栈**顶部读取 `index` 为**大端序**（big-endian）格式的 `uint256`，如果 `index < len(tx.blob_versioned_hashes)` ，则在堆栈上用 `tx.blob_versioned_hashes[index]` 替换它，否则栈顶被替换为全零的 `bytes32` 值。该操作码的 gas 成本为 `HASH_OPCODE_GAS`。
 
-注：**大端序（big-endian）**是一种字节存储的排序方式。最高有效字节写在地址最低位，而最低有效字节写在地址的最高位。越靠左的字节越位于高位，而地址索引号越小则表示地址越低。
+注：**大端序**（big-endian）是一种字节存储的排序方式。最高有效字节写在地址最低位，而最低有效字节写在地址的最高位。越靠左的字节越位于高位，而地址索引号越小则表示地址越低。
 
 ---
 
@@ -265,7 +265,7 @@ def calc_excess_blob_gas(parent: Header) -> int:
 
 执行**点评估预编译**的方法 {**point_evaluation_precompile**} 做了 2 件事：
 
-- 验证：“由给定的 **KZG 承诺** 所计算出的**版本化哈希**（通过 {**kzg_to_versioned_hash**} 方法计算）”是否等于“给定的**版本化哈希**”。
+- 验证：“由给定的 **KZG 承诺** 所计算出的**版本化哈希**（通过新增的 {**kzg_to_versioned_hash**} 方法计算）”是否等于“给定的**版本化哈希**”。
 - 验证：给定的 ***KZG Proof*** 是否有效（通过 `[verify_kzg_proof()](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md#verify_kzg_proof)` 计算）。
 
 方法 {**point_evaluation_precompile**} 的唯一参数 input 是一个 bytes 变量，其实际长度应为 192 ，是包含多个参数拼接起来的字节序列，包含如下参数：
@@ -298,7 +298,7 @@ def point_evaluation_precompile(input: Bytes) -> Bytes:
     assert verify_kzg_proof(commitment, z, y, proof)
 
     # Return FIELD_ELEMENTS_PER_BLOB and BLS_MODULUS as padded 32 byte big endian values
-    return Bytes(U256(FIELD_ELEMENTS_PER_BLOB).to_be_bytes32() + U256(**BLS_MODULUS**).to_be_bytes32())
+    return Bytes(U256(FIELD_ELEMENTS_PER_BLOB).to_be_bytes32() + U256(BLS_MODULUS).to_be_bytes32())
 ```
 
 返回值为返回 **`FIELD_ELEMENTS_PER_BLOB`** 和 **`BLS_MODULUS`**，这两个值被填充为 bytes32 **大端序**的格式。
@@ -318,9 +318,7 @@ def point_evaluation_precompile(input: Bytes) -> Bytes:
 
 本 EIP 中的“侧车”设计允许 **blob** 数据与**信标区块体**分开传播，使 **blob** **数据**可以独立地被网络中的节点接收和处理。这种“***sidecar***”设计，将 `is_data_available()` 黑盒化，为进一步的数据增加提供了**前向兼容性**：通过**完全分片**，`is_data_available()` 可以被*数据可用性采样 (DAS, data-availability-sampling)* 取代，从而避免所有 **blob** 被所有**信标节点**下载。
 
-解释：数据可用性采样 (DAS, data-availability-sampling)
-Danksharding 提出了一个方案—*数据可用性采样（Data Availability Sampling*）来实现降低节点负担的同时也保证了数据可用性。
-数据可用性采样（DAS）的思想是将 Blob 中的数据切割成数据碎片，并且让节点由下载 Blob 数据转变为随机抽查 Blob 数据碎片，让 Blob 的数据碎片分散在以太坊的每个节点中，但是完整的 Blob 数据却保存在整个以太坊账本中，前提是节点需要足够多且去中心化。
+**数据可用性采样** (DAS, data-availability-sampling)：Danksharding 提出的一个方案，用于实现降低节点负担的同时也保证了数据可用性。其思想是将 blob 中的数据切割成数据碎片，并且让节点由下载 blob 数据转变为随机抽查 blob 数据碎片，让 blob 的数据碎片分散在以太坊的每个节点中，但是完整的 blob 数据却保存在整个以太坊账本中，前提是节点需要足够多且去中心化。
 
 ***共识层*** 具体的更改内容（**[ethereum/consensus-specs](https://github.com/ethereum/consensus-specs)** 代码库也定义了更改内容）：
 
@@ -353,8 +351,10 @@ def validate_block(block: Block) -> None:
 
         # 当检测到 tx 类型为 blob 交易时：
         if get_tx_type(tx) == BLOB_TX_TYPE:
+          
         # 为 gas 总费用额外添加 blob 的费用最大值，得到收取的 gas 总费用最大值
             max_total_fee += get_total_blob_gas(tx) * tx.max_fee_per_blob_gas
+          
         # 断言用户余额充足
         assert signer(tx).balance >= max_total_fee
 
@@ -415,7 +415,7 @@ def validate_block(block: Block) -> None:
 
 ### 11. **用于验证 blob 交易 KZG 承诺的方法**
 
-在整个提案中，我们使用相应**[共识 4844 规范](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb)**中定义的加密**方法**和**类**。
+在整个提案中，我们使用相应[共识 4844 规范](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb)中定义的加密方法和类。
 
 具体来说，使用 `[polynomial-commitments.md](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md)` 中的以下方法：
 
@@ -498,13 +498,13 @@ def validate_block(block: Block) -> None:
 
 Rollup 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 Rollup 块的提交者将这些数据放入 `blob` 中。这保证了可用性且比 `calldata` 便宜得多。 Rollup 需要数据至少**可用一次**，且时间足够长，以确保诚实的参与者可以构建 rollup 状态，但不是永远可用。
 
-- **Optimistic Rollups** 只需要在提交*欺诈证明* 时实际提供基础数据。*欺诈证明* 可以以较小的步骤验证*转换*，通过 `calldata` 一次最多加载 `blob` 的几个值。对于每个值，它将提供 ***KZG proof***，并使用**点评估预编译(point evaluation precompile)**来根据之前提交的**版本化哈希**来验证该值，然后像今天一样对该数据执行*欺诈证明* 验证。
+- **Optimistic Rollups** 只需要在提交*欺诈证明* 时实际提供基础数据。*欺诈证明* 可以以较小的步骤验证*转换*，通过 `calldata` 一次最多加载 `blob` 的几个值。对于每个值，它将提供 ***KZG proof***，并使用**点评估预编译**(point evaluation precompile)来根据之前提交的**版本化哈希**来验证该值，然后像今天一样对该数据执行*欺诈证明* 验证。
 - **ZK Rollups** 将为它们的交易或状态增量数据提供两个承诺：
-    
+  
     - **blob 承诺**（协议确保指向可用数据）。
     - **ZK rollup 自己的承诺**（使用 rollup 内部使用的任何证明系统）。
     
-    **blob 承诺**和 **ZK rollup 自己的承诺**使用“**等价证明协议**”，使用**点评估预编译(point evaluation precompile)**来证明两个承诺引用相同的数据。
+    **blob 承诺**和 **ZK rollup 自己的承诺**使用“**等价证明协议**”，使用**点评估预编译**(point evaluation precompile)来证明两个承诺引用相同的数据。
 
 ---
 
@@ -528,7 +528,7 @@ Rollup 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 
 
 **blob 交易**在**内存池**层具有较大的数据量，这会带来内存池 **DoS** 风险，尽管这并不是前所未有的风险，因为这种风险也确实来源于具有大量 `calldata` 的交易。
 
-通过仅广播 **Blob 交易**的公告，接收节点将可以控制接收哪些交易以及接收多少交易，从而允许它们将吞吐量限制在可接受的水平。 **EIP-5793** 将通过扩展 `NewPooledTransactionHashes` 公告消息以包含**交易类型**和**交易大小**，为节点提供进一步的细粒度控制。
+通过仅广播 **blob 交易**的公告，接收节点将可以控制接收哪些交易以及接收多少交易，从而允许它们将吞吐量限制在可接受的水平。 **EIP-5793** 将通过扩展 `NewPooledTransactionHashes` 公告消息以包含**交易类型**和**交易大小**，为节点提供进一步的细粒度控制。
 
 此外，我们建议在内存池交易替换规则中加入 1.1 倍 **blob** **基础费**提升要求。
 
@@ -536,7 +536,7 @@ Rollup 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 
 
 ### 6. 安全考虑
 
-此 EIP 使每个信标区块的**带宽（bandwidth）**要求最多增加约 0.75 MB（6 个 **blob**）。
+此 EIP 使每个信标区块的**带宽**（bandwidth）要求最多增加约 0.75 MB（6 个 **blob**）。
 
 若此 EIP 实施后，理论上每个区块的最大容量比目前的最大容量（30M Gas / 每个 `calldata` 字节 16 Gas = 1.875MB）大 40%（0.75 MB / 1.875MB），理论上不会大幅增加最坏情况下的带宽。合并后，区块时间是静态的，而不是不可预测的泊松分布，为大区块的传播提供了保证的时间段。
 
