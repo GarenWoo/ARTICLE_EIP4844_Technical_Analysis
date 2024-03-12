@@ -139,7 +139,7 @@ blob 交易的发送者对交易数据进行的数字签名，先将 `BLOB_TX_TY
 
 ### 4. blob gas 设计
 
-我们引入 **blob gas** 作为一种新型 gas。它独立于普通 gas 并遵循自己的目标规则（类似于 **EIP-1559**）。
+引入 **blob gas** 作为一种新型 gas。它独立于普通 gas 并遵循自己的目标规则（类似于 **EIP-1559**）。
 
 1. **单个 blob 的 gas 容量**由新增常量 `GAS_PER_BLOB` 定义，值为 `2 ** 17`，即 131072 单位个 gas。
 2. **目标 blob gas 消耗量**由新增常量 `TARGET_BLOB_GAS_PER_BLOCK` 定义，对应于 3 个 blob 的 gas 容量，即 `393216` 单位个 gas（3 * `GAS_PER_BLOB`）。
@@ -253,7 +253,7 @@ def calc_excess_blob_gas(parent: Header) -> int:
 
 - `HASH_OPCODE_GAS`：blob 数据哈希计算所对应的 gas 消耗量，为固定值 3 。
 
-我们添加一条指令 `BLOBHASH`（操作码为 `HASH_OPCODE_BYTE`），该指令从**堆栈**顶部读取 `index` 为**大端序**（big-endian）格式的 `uint256`，如果 `index < len(tx.blob_versioned_hashes)` ，则在堆栈上用 `tx.blob_versioned_hashes[index]` 替换它，否则栈顶被替换为全零的 `bytes32` 值。该操作码的 gas 成本为 `HASH_OPCODE_GAS`。
+此 EIP 添加一条指令 `BLOBHASH`（操作码为 `HASH_OPCODE_BYTE`），该指令从**堆栈**顶部读取 `index` 为**大端序**（big-endian）格式的 `uint256`，如果 `index < len(tx.blob_versioned_hashes)` ，则在堆栈上用 `tx.blob_versioned_hashes[index]` 替换它，否则栈顶被替换为全零的 `bytes32` 值。该操作码的 gas 成本为 `HASH_OPCODE_GAS`。
 
 注：**大端序**（big-endian）是一种字节存储的排序方式。最高有效字节写在地址最低位，而最低有效字节写在地址的最高位。越靠左的字节越位于高位，而地址索引号越小则表示地址越低。
 
@@ -419,7 +419,7 @@ def validate_block(block: Block) -> None:
 
 ### 11. **用于验证 blob 交易 KZG 承诺的方法**
 
-在整个提案中，我们使用相应[共识 4844 规范](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb)中定义的加密方法和类。
+整个 EIP 使用相应[共识 4844 规范](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb)中定义的加密方法和类。
 
 具体来说，使用 `[polynomial-commitments.md](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md)` 中的以下方法：
 
@@ -471,7 +471,7 @@ def validate_block(block: Block) -> None:
 
 目前 **rollup** 使用 `calldata`做数据存储。未来，**rollups** 将只能使用**分片数据**（即“**blob**”），因为**分片数据**会便宜得多。
 
-因此，**rollup** 过程中不可避免地要对其处理数据的方式进行一次重大升级。但我们能做的是确保 **rollup** 只需升级一次。相比降低现有的 `calldata` 的 gas 成本，采用**分片数据**（ 即 **blob** ）的格式是目前以太坊扩容的权宜之计。
+以太坊基金会承认**rollup** 过程中不可避免地要对其处理数据的方式进行一次重大升级，但确保 **rollup** 只需升级一次。相比降低现有的 `calldata` 的 gas 成本，采用**分片数据**（ 即 **blob** ）的格式是目前以太坊扩容的权宜之计。
 
 **该 EIP 已经完成的工作包括：**
 
@@ -514,7 +514,7 @@ Rollup 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 
 
 然而，**点评估（point evaluation）**发生在有限域内，并且只有在已知字段**模数**（mudulus）的情况下才能很好地定义。智能合约可以包含一个将承诺版本映射到**模数**的表，但这不允许智能合约考虑对未知**模数**的未来升级。通过允许访问 EVM 内部的**模数** ，可以构建智能合约，以便它可以使用未来的承诺和证明，而无需升级。
 
-为了不添加另一个预编译，我们直接从**点评估预编译(point evaluation precompile)**返回**模数**和**多项式次数**。然后调用者就可以使用它。它也是“免费的”，因为调用者可以忽略返回值的这一部分，而不会产生额外的成本——在可预见的未来保持可升级的系统现在可能会使用这条路线。
+通过让**点评估预编译**(point evaluation precompile)直接返回模数和多项式次数，智能合约可以获得执行验证所需的关键信息，无需依赖额外的预编译来获取这些信息，然后调用者就可以使用它。它也是“免费的”，因为调用者可以忽略返回值的这一部分，而不会产生额外的成本——在可预见的未来保持可升级的系统现在可能会使用这条路线。
 
 ---
 
@@ -530,7 +530,7 @@ Rollup 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 
 
 通过仅广播 **blob 交易**的公告，接收节点将可以控制接收哪些交易以及接收多少交易，从而允许它们将吞吐量限制在可接受的水平。 **EIP-5793** 将通过扩展 `NewPooledTransactionHashes` 公告消息以包含**交易类型**和**交易大小**，为节点提供进一步的细粒度控制。
 
-此外，我们建议在内存池交易替换规则中加入 1.1 倍 **blob** **基础费**提升要求。
+此外，以太坊官方建议在内存池交易替换规则中加入 1.1 倍 **blob** **基础费**提升要求。
 
 ---
 
@@ -546,3 +546,11 @@ Rollup 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 
 ## E. 小结
 
 EIP-4844 标志着以太坊在解决可扩展性障碍和提高整体网络性能的道路上迈出了重要的一步，同时使未来完全分片所需的更新更少。Proto-Danksharding 增加了 blob 数据空间，这将允许更多的数据处理，显著地降低以太坊 L2 的交易成本，提高 Layer2 的交易吞吐量。会进一步带动 Layer2 生态的繁荣。Dencun 升级还会带动去中心化存储、DA 以及 RaaS 等 Infra 赛道的需求。
+
+
+> 参考资料
+> 1.  [EIP-4844: Shard Blob Transactions](https://eips.ethereum.org/EIPS/eip-4844)
+> 2. [MT Capital 研报：全面解读以太坊坎昆升级，潜在机会与利好赛道](https://www.techflowpost.com/article/detail_15655.html)
+> 3. [ethereum/consensus-specs](https://github.com/ethereum/consensus-specs/tree/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb)
+> 4. [以太坊坎昆升级详解](https://www.datawallet.com/zh/%E9%9A%90%E8%94%BD%E6%80%A7/ethereum-cancun-upgrade-explained)
+> 5. [EIP-4844 解释](https://www.datawallet.com/zh/%E9%9A%90%E8%94%BD%E6%80%A7/eip-4844-explained)
