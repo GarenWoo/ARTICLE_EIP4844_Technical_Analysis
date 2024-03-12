@@ -21,6 +21,7 @@
 <br>
 
 <figure>   <img src="https://img.learnblockchain.cn/pics/20240312194518.png" alt="Layer2(OP)交易成本多数来自 Layer1 数据存储">   <figcaption>Layer2(OP)交易成本多数来自 Layer1 数据存储（数据来自 Dune.com）</figcaption> </figure>
+
 <br>
 
 解决 **Rollup** 本身长期不足的长期解决方案一直是**数据分片**，这将为可用 **Rollups** 的链增加约 16 MB 的专用数据空间。然而，**数据分片**仍需要相当长的时间才能完成实施和部署。
@@ -30,6 +31,7 @@
 **EIP-4844** 提出的扩容方案被称为 "**Proto-Danksharding**"，此名称来自该扩容思路的以太坊研究员 Dankrad Feist 和 Proto Lambda 。其中，“**Danksharding**” 是一种[分片解决方案](https://ethereum.org/en/roadmap/danksharding/)，通过将以太坊网络分割成多个“片段”以分散工作负载并提高交易处理能力。前缀 "**Proto-**"表示它是该分片解决方案的初步或初始阶段，旨在显著提高以太坊的可扩展性。
 
 <figure>   <img src="https://img.learnblockchain.cn/pics/20240312194540.jpg" alt="Proto-DankshardingWorkingProcess">   <figcaption>Proto-Dankshanrding 工作原理</figcaption> </figure>
+
 <br>
 
 此 EIP 通过实现将在**完全分片**中使用的**交易格式**，先行解决数据存储和传输的效率问题，为将来分片带来的数据管理挑战提前做准备，从而提供了一个权宜之计的解决方案。此 EIP 的改进和数据结构能够无缝集成，避免了未来可能需要的大规模重构。
@@ -49,16 +51,14 @@
 
 一个 **blob** 的**可用容量**为 4096 * 32 个字节，约为 **0.125 MB** 。
 
-此 EIP 还新增了部分常量：
+另新增常量 `MIN_EPOCHS_FOR_BLOB_SIDECARS_REQUESTS`：为固定值 4096 ，定义了节点必须存储 blob 数据的最少时段数（4096 * 32 * 12 / 3600 / 24 = ~18.2 天），期间数据依然可以被网络中的节点访问和验证；逾期后，节点有权删除 blob 中的**侧车数据**。这个常量保证网络中任何节点都能够获取所需的历史数据，从而维护网络的完整性和连续性。
 
-- `MIN_EPOCHS_FOR_BLOB_SIDECARS_REQUESTS`：为固定值 4096，定义了节点必须存储 blob 数据的最少时段数（4096 * 32 * 12 / 3600 / 24 = ~18.2 天），逾期后，节点有权删除 blob 中的侧车数据。这个常量保证网络中任何节点都能够获取所需的历史数据，从而维护网络的完整性和连续性
-数据依然可以被网络中的节点访问和验证
-
-**侧车数据**（sidecars）：泛指与 blob 交易相关联的数据但不直接存储在区块链上的附加信息，并非 blob 一个单独的组成部分，包括但不限于 blob 数据本身、KZG承诺、KZG proof、版本化哈希、Merkle root（如果 blob 数据通过 Merkle tree 构建的话）等。
+注：**侧车数据**（sidecars），泛指与 blob 交易相关联的数据但不直接存储在区块链上的附加信息（包括但不限于 blob 数据本身、KZG承诺、KZG proof、版本化哈希等）。
 
 **blob 数据的组成部分**：
 
 1. **用户数据**：这是 blob 的核心内容，即要在以太坊上存储和传输的实际数据集。对于不同的应用，这些数据可能包括但不限于交易详情、状态变更信息或任何需要在区块链上存储的大量数据。
+
 2. **数据承诺与证明**：为了确保数据的完整性和可验证性，blob 通常会包含一个数据承诺以及用于验证承诺的证明，使得任何人都可以验证 blob 中数据的正确性和完整性，而无需访问整个数据集。
 
 ---
@@ -126,7 +126,6 @@
   - `cumulative_transaction_gas_used`：执行到当前交易为止累计的 gas 消耗量。
   - `logs_bloom`：交易产生的日志的Bloom过滤器，用于快速检索日志事件。
   - `logs`：交易执行过程中产生的日志事件列表。
-
 
 
 ---
@@ -401,7 +400,8 @@ def validate_block(block: Block) -> None:
 
 **blob 交易**的网络传播有 2 种表示形式：`PooledTransactions` 和`BlockBodies`。
 
-- 第 1 种：`PooledTransactions`（**交易 gossip 传播**），**blob 交易**的 **EIP-2718** `TransactionPayload` 被包装为：
+
+第 1 种：`PooledTransactions`（**交易 gossip 传播**），**blob 交易**的 **EIP-2718** `TransactionPayload` 被包装为：
 
   ```python
   rlp([tx_payload_body, blobs, commitments, proofs])
@@ -409,18 +409,20 @@ def validate_block(block: Block) -> None:
 
   每个元素的定义如下：
 
-  - `tx_payload_body` -  **[EIP-2718](https://eips.ethereum.org/EIPS/eip-2718)** 标准 blob 交易的 `TransactionPayloadBody`
+  - `tx_payload_body`：**[EIP-2718](https://eips.ethereum.org/EIPS/eip-2718)** 标准 blob 交易的 `TransactionPayloadBody`
   - `blobs`：`blob` 项目列表
   - `commitments`：对应于  `blobs` 的 `KZGCommitment` 列表
   - `proofs`：对应于 `blobs` 和 `commitments` 的 `KZGProof` 列表
 
-  节点必须验证 `tx_payload_body` 并根据它验证包装的数据。应确保：
+ 节点必须验证 `tx_payload_body` 并根据它验证包装的数据。应确保：
 
   - 有相同数量的 `tx_payload_body`.`blob_versioned_hashes`、`blobs`、`commitments` 和 `proofs` （根据索引一一对应）。
   - 对应于版本化哈希的 KZG `commitments` ，即 `kzg_to_versioned_hash(commitments[i]) == tx_payload_body.blob_versioned_hashes[i]` 。
   - KZG `commitments` 匹配对应的 `blobs` 和 `proofs`（这可以使用 `verify_blob_kzg_proof_batch` 进行优化，并在从**承诺**和每个 **blob** 的 blob 数据派生的点处进行随机评估的证明）
 
-- 第 2 种：`BlockBodies`（**区块体检索**），使用 **[EIP-2718](https://eips.ethereum.org/EIPS/eip-2718)** 标准 **blob 交易**的 `TransactionPayloadBody` 。
+
+第 2 种：`BlockBodies`（**区块体检索**），使用 **[EIP-2718](https://eips.ethereum.org/EIPS/eip-2718)** 标准 **blob 交易**的 `TransactionPayloadBody` 。
+
 
 ❗ 节点**不可自动**向其对等节点广播 **blob 交易**。相反，这些交易仅使用 `NewPooledTransactionHashes` 消息来公布，然后可以通过 `GetPooledTransactions` 手动请求。这种设计减少了不必要的网络负担，确保只有真正需要这些数据的节点才会请求和接收 **blob 交易** 的详细内容。
 
@@ -453,7 +455,7 @@ def validate_block(block: Block) -> None:
    ```
 
    此方法通过添加一个**版本前缀**和**使用哈希函数**，确保了 KZG 承诺的唯一性和可验证性，同时在数据结构中明确表示了所使用的加密方案版本。
-   
+
    `KZGCommitment`：基础类型为`Bytes48`，用于以加密安全的方式承诺到一组数据。这里的`Bytes48` 指定了承诺的存储格式。执行“KeyValidate”检查确保了这个承诺是有效的 **BLS 密钥**（即这个 KZG 承诺有效且安全）。允许身份点意味着在特定的加密操作中，**零值**（或"没有数据"）也被视为有效的承诺。
 
 2. {**fake_exponential**}：使用**泰勒展开式**近似以 e 为底的指数计算，从而避免使用浮点数运算。
@@ -558,8 +560,9 @@ EIP-4844 标志着以太坊在解决可扩展性障碍和提高整体网络性�
 
 
 > 参考资料
+>
 > 1.  [EIP-4844: Shard Blob Transactions](https://eips.ethereum.org/EIPS/eip-4844)
-> 2. [MT Capital 研报：全面解读以太坊坎昆升级，潜在机会与利好赛道](https://www.techflowpost.com/article/detail_15655.html)
-> 3. [ethereum/consensus-specs](https://github.com/ethereum/consensus-specs/tree/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb)
-> 4. [以太坊坎昆升级详解](https://www.datawallet.com/zh/%E9%9A%90%E8%94%BD%E6%80%A7/ethereum-cancun-upgrade-explained)
-> 5. [EIP-4844 解释](https://www.datawallet.com/zh/%E9%9A%90%E8%94%BD%E6%80%A7/eip-4844-explained)
+> 2.  [MT Capital 研报：全面解读以太坊坎昆升级，潜在机会与利好赛道](https://www.techflowpost.com/article/detail_15655.html)
+> 3.  [ethereum/consensus-specs](https://github.com/ethereum/consensus-specs/tree/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb)
+> 4.  [以太坊坎昆升级详解](https://www.datawallet.com/zh/%E9%9A%90%E8%94%BD%E6%80%A7/ethereum-cancun-upgrade-explained)
+> 5.  [EIP-4844 解释](https://www.datawallet.com/zh/%E9%9A%90%E8%94%BD%E6%80%A7/eip-4844-explained)
