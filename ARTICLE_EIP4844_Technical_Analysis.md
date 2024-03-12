@@ -1,12 +1,12 @@
 # EIP-4844 背景与技术解读
 
-**EIP-4844** 是以太坊 **Dencun 升级**中最重要的提案，标志着以太坊在以去中心化方式扩容的道路上迈出了切实而重要的一步。
+**前言**：EIP-4844 是以太坊 Dencun 升级中最重要的提案，标志着以太坊在以去中心化方式扩容的道路上迈出了切实而重要的一步。随着 Dencun 升级于 2024.3.13 上线以太坊主网，EIP-4844 也将得到实施。
 
 ## A. 概述
 
-**EIP-4844** 引入新的数据存储类型“blob”（Binary Large Object），是以太坊网络一种新的用于存储和传输的数据存储类型，旨在为 Layer 2 扩容方案提供数据可用性保障，且保证较低的数据存储和传输的成本。从而实现临时的扩容解决方案并为未来的全分片提供基础。
+**EIP-4844** 引入新的数据存储类型“blob”（Binary Large Object），是以太坊网络一种新的用于存储和传输的数据存储类型，旨在为 Layer 2 扩容方案提供数据可用性保障，且保证较低的数据存储和传输的成本。从而实现临时的扩容解决方案并为未来的**完全分片**提供基础。
 
-引入新的交易格式“**blob-carrying transactions**”，其中包含的 blob 数据，EVM 无需访问 blob 数据本身，仅通过其**承诺（commitment）**即可验证 blob 数据的正确性和完整性。从而实现临时的扩容解决方案并为未来的**完全分片**提供基础。
+引入新的交易格式“**blob-carrying transactions**”，其中包含的 blob 数据，EVM 无需访问 blob 数据本身，仅通过其**承诺**（commitment）即可验证 blob 数据的正确性和完整性。从而实现临时的扩容解决方案并为未来的**完全分片**提供基础。
 
 该 EIP 可理解是**完全分片**彻底实施前的“先行版本”。
 
@@ -16,19 +16,19 @@
 
 目前 Rollups 显着降低了许多以太坊用户的费用，但费用依然对于许多用户来说是昂贵的。Rollup 的相对昂贵源自于 Calldata 有限的存储空间和 Layer2 数据对 Layer1 较高的存储需求。Layer2 的交易数据并不需要永久存储于昂贵的以太坊 Layer1 上，显然 Calldata 不适宜作为 layer 交易数据的存储空间。从链上数据可知，目前使用 Layer2 的成本多数来自于 Calldata 数据永久存储成本。
 
-<figure>   <img src="./images/IMG2.png" alt="Layer2 使用费用">   <figcaption>Layer2 使用费用（数据来自 l2fees.info）</figcaption> </figure>
+<figure>   <img src="https://img.learnblockchain.cn/pics/20240312194453.png" alt="Layer2 使用费用">   <figcaption>Layer2 使用费用（数据来自 l2fees.info）</figcaption> </figure>
 
+<br>
 
-
-<figure>   <img src="./images/IMG3.png" alt="Layer2(OP)交易成本多数来自 Layer1 数据存储">   <figcaption>Layer2(OP)交易成本多数来自 Layer1 数据存储（数据来自 Dune.com）</figcaption> </figure>
+<figure>   <img src="https://img.learnblockchain.cn/pics/20240312194518.png" alt="Layer2(OP)交易成本多数来自 Layer1 数据存储">   <figcaption>Layer2(OP)交易成本多数来自 Layer1 数据存储（数据来自 Dune.com）</figcaption> </figure>
 
 解决 **Rollup** 本身长期不足的长期解决方案一直是**数据分片**，这将可用 **Rollups** 的链添加约 16 MB 的专用数据空间。然而，**数据分片**仍需要相当长的时间才能完成实施和部署。
 
 以太坊即将进行的 **Dencun 升级**属于以太坊升级路线图 “**The Surge**” 的一部分，旨在通过 **Proto-Danksharding** 的引⼊，进⼀步提⾼以太坊的交易吞吐量和可扩展性。
 
-EIP-4844 被用于提高可扩展性和效率，扩容方案被称为 "Proto-Danksharding"，名称来自该扩容思路的以太坊研究员 Dankrad Feist 和 Proto Lambda。其中，“Danksharding” 是一种[分片解决方案](https://ethereum.org/en/roadmap/danksharding/)，通过将以太坊网络分割成多个“片段”以分散工作负载并提高交易处理能力。前缀 "Proto- "表示它是该分片解决方案的初步或初始阶段，旨在显著提高以太坊的可扩展性。
+EIP-4844 被用于提高可扩展性和效率，扩容方案被称为 "**Proto-Danksharding**"，名称来自该扩容思路的以太坊研究员 Dankrad Feist 和 Proto Lambda。其中，“**Danksharding**” 是一种[分片解决方案](https://ethereum.org/en/roadmap/danksharding/)，通过将以太坊网络分割成多个“片段”以分散工作负载并提高交易处理能力。前缀 "**Proto-**"表示它是该分片解决方案的初步或初始阶段，旨在显著提高以太坊的可扩展性。
 
-<figure>   <img src="./images/IMG1.jpg" alt="Proto-DankshardingWorkingProcess">   <figcaption>Proto-Dankshanrding 工作原理</figcaption> </figure>
+<figure>   <img src="https://img.learnblockchain.cn/pics/20240312194540.jpg" alt="Proto-DankshardingWorkingProcess">   <figcaption>Proto-Dankshanrding 工作原理</figcaption> </figure>
 
 此 EIP 通过实现将在**完全分片**中使用的**交易格式**，先行解决数据存储和传输的效率问题，为将来分片带来的数据管理挑战提前做准备，从而提供了一个权宜之计的解决方案。此 EIP 的改进和数据结构能够无缝集成，避免了未来可能需要的大规模重构。
 
@@ -49,7 +49,7 @@ EIP-4844 被用于提高可扩展性和效率，扩容方案被称为 "Proto-Dan
 
 此 EIP 还新增了部分常量：
 
-- MIN_EPOCHS_FOR_BLOB_SIDECARS_REQUESTS：固定值 4096，定义了节点必须存储 blob 数据的最小时段数，以便在必要时可以检索这些数据（4096 * 32 * 12 / 3600 / 24 = ~18.2 天）
+- `MIN_EPOCHS_FOR_BLOB_SIDECARS_REQUESTS`：固定值 4096，定义了节点必须存储 blob 数据的最小时段数，以便在必要时可以检索这些数据（4096 * 32 * 12 / 3600 / 24 = ~18.2 天）
 
 **blob 数据的组成部分**：
 
@@ -64,9 +64,9 @@ EIP-4844 被用于提高可扩展性和效率，扩容方案被称为 "Proto-Dan
 
 [**EIP-2718**](https://eips.ethereum.org/EIPS/eip-2718) 定义了一种交易类型的框架，使得后续的 EIP 所引入新的交易类型可以向后兼容：
 
-  1. `TransactionType || TransactionPayload` 为有效的交易。
-
-  2. `TransactionType || ReceiptPayload` 为有效的交易收据。
+    1. `TransactionType || TransactionPayload` 为有效的交易。
+    
+    2. `TransactionType || ReceiptPayload` 为有效的交易收据。
 
 其中，`TransactionType` 定义交易格式，`TransactionPayload` 和 `ReceiptPayload` 分别是交易和收据内容。**EIP-4844** 所引入的**blob 交易**向前兼容此交易类型的框架。
 
@@ -88,7 +88,7 @@ EIP-4844 被用于提高可扩展性和效率，扩容方案被称为 "Proto-Dan
 
   - **blob 交易 `TransactionPayloadBody` 各字段解释如下**：
 
-    - **blob 交易常规字段**（与 ***EIP-1559*** 的语义相同）：
+    - **blob 交易常规字段**（与 **EIP-1559** 的语义相同）：
 
       - `chain_id`：链 ID 。
       - `nonce`：发送者账户的交易计数器。
@@ -99,9 +99,9 @@ EIP-4844 被用于提高可扩展性和效率，扩容方案被称为 "Proto-Dan
       - `data`：交易的输入数据。
       - `access_list`：一个访问列表，包括交易执行过程中需要访问的**地址**和**存储键**，以优化 gas 消耗和提高交易执行效率。
 
-    - **blob 交易非常规字段**（与 ***EIP-1559*** 的语义不同）：
+    - **blob 交易非常规字段**（与 **EIP-1559** 的语义不同）：
 
-      - `to` ：接收方的**20 字节地址**，不同于 ***EIP-1559***，但它不能为 `nil`。这意味着 **blob 交易**不能用来创建合约。
+      - `to` ：接收方的**20 字节地址**，不同于 **EIP-1559**，但它不能为 `nil`。这意味着 **blob 交易**不能用来创建合约。
 
     - **blob 交易独有字段**：
 
@@ -152,7 +152,7 @@ blob 交易的发送者对交易数据进行的数字签名，先将 `BLOB_TX_TY
 `blob_base_fee = MIN_BLOB_BASE_FEE * e**(excess_blob_gas / BLOB_BASE_FEE_UPDATE_FRACTION)`
 
 - `MIN_BLOB_BASE_FEE`：此 **EIP** 新增常量，表示最小的 blob gas 单价，为固定值 1 wei。
-- `excess_blob_gas` 是“从此 EIP 实施后至今各区块 **blob gas** 的消耗量”相比“**目标 blob gas 数量**”多出的 **blob gas** 数量的加总，是整个网络全局的累积值。与 **EIP-1559** 类似，它是一个自我修正公式：随着超额费用增加，`blob_base_fee` 呈**指数**增长，减少使用量并最终迫使超额费用回落。` 
+- `excess_blob_gas` 是“从此 EIP 实施后至今各区块 **blob gas** 的消耗量”相比“**目标 blob gas 数量**”多出的 **blob gas** 数量的加总，是整个网络全局的累积值。与 **EIP-1559** 类似，它是一个自我修正公式：随着超额费用增加，`blob_base_fee` 呈**指数**增长，减少使用量并最终迫使超额费用回落。
 - `BLOB_BASE_FEE_UPDATE_FRACTION`是新增的常量，值为 3338477 ，是 blob 基础费更新的分数值，用于调整交易费用。
 - 指数计算通过方法 {**fake_exponential**} 来近似实现。
 
@@ -270,7 +270,7 @@ def calc_excess_blob_gas(parent: Header) -> int:
 执行**点评估预编译**的方法 {**point_evaluation_precompile**} 做了 2 件事：
 
 - 验证：“由给定的 **KZG 承诺** 所计算出的**版本化哈希**（通过新增的 {**kzg_to_versioned_hash**} 方法计算）”是否等于“给定的**版本化哈希**”。
-- 验证：给定的 ***KZG Proof*** 是否有效（通过 `[verify_kzg_proof()](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md#verify_kzg_proof)` 计算）。
+- 验证：给定的 ***KZG Proof*** 是否有效（通过 [verify_kzg_proof()](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md#verify_kzg_proof) 计算）。
 
 方法 {**point_evaluation_precompile**} 的唯一参数 input 是一个 bytes 变量，其实际长度应为 192 ，是包含多个参数拼接起来的字节序列，包含如下参数：
 
@@ -309,7 +309,7 @@ def point_evaluation_precompile(input: Bytes) -> Bytes:
 
 **预编译**必须拒绝**非规范字段元素**（即**提供的字段元素必须严格小于** **`BLS_MODULUS`**）。
 
-1. `BLS_MODULUS`：本 EIP 新增常量，用于 BLS（Boneh-Lynn-Shacham）签名体系的**有限字段**的**模数**（modulus），为固定值 52435875175126190479447740508185965837690552500527637822603658699938581184513 。
+1. `BLS_MODULUS`：本 EIP 新增常量，用于 **BLS**（Boneh-Lynn-Shacham）签名体系的**有限字段**的**模数**（modulus），为固定值 `52435875175126190479447740508185965837690552500527637822603658699938581184513` 。
 2. **有限字段**：有限字段的大小通常由一个主要的质数或某个质数的幂来定义，这个数称为字段的**模数**。在椭圆曲线密码学中，这个**模数**通常用来定义椭圆曲线上点的坐标所属的数学范围。
 
 ---
@@ -334,7 +334,7 @@ def point_evaluation_precompile(input: Bytes) -> Bytes:
 
 ### 9. 执行层验证
 
-在*执行层*，区块有效性条件扩展如下：
+在*执行层*，区块的有效性验证方法 {validate_block} 新增如下逻辑：
 
 ```python
 def validate_block(block: Block) -> None:
@@ -400,16 +400,16 @@ def validate_block(block: Block) -> None:
 
   每个元素的定义如下：
 
-  - `tx_payload_body` -  **[EIP-2718](https://eips.ethereum.org/EIPS/eip-2718)** 标准 blob 交易的 `TransactionPayloadBody`
+  - `tx_payload_body` -  **[EIP-2718](https://eips.ethereum.org/EIPS/eip-2718)** 标准 blob 交易的 `TransactionPayloadBody`
   - `blobs`：`blob` 项目列表
   - `commitments`：对应于  `blobs` 的 `KZGCommitment` 列表
   - `proofs`：对应于 `blobs` 和 `commitments` 的 `KZGProof` 列表
 
-  节点必须验证 `tx_payload_body` 并根据它验证包装的数据。为此，请确保：
+  节点必须验证 `tx_payload_body` 并根据它验证包装的数据。应确保：
 
-  - 有相同数量的 `tx_payload_body`.`blob_versioned_hashes`、`blobs`、`commitments` 和 `proofs` 。
+  - 有相同数量的 `tx_payload_body`.`blob_versioned_hashes`、`blobs`、`commitments` 和 `proofs` （根据索引一一对应）。
   - 对应于版本化哈希的 KZG `commitments` ，即 `kzg_to_versioned_hash(commitments[i]) == tx_payload_body.blob_versioned_hashes[i]` 。
-  - **KZG `commitments`** 匹配对应的 **`blobs`** 和 **`proofs`**（这可以使用 `verify_blob_kzg_proof_batch` 进行优化，并在从**承诺**和每个 **blob** 的 **blob 数据**派生的点处进行随机评估的证明）
+  - KZG `commitments` 匹配对应的 `blobs` 和 `proofs`（这可以使用 `verify_blob_kzg_proof_batch` 进行优化，并在从**承诺**和每个 **blob** 的 blob 数据派生的点处进行随机评估的证明）
 
 - 第 2 种：`BlockBodies`（**区块体检索**），使用 **[EIP-2718](https://eips.ethereum.org/EIPS/eip-2718)** 标准 **blob 交易**的 `TransactionPayloadBody` 。
 
@@ -423,11 +423,8 @@ def validate_block(block: Block) -> None:
 
 具体来说，使用 `[polynomial-commitments.md](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md)` 中的以下方法：
 
-- `[verify_kzg_proof()](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md#verify_kzg_proof)`
-- `[verify_blob_kzg_proof_batch()](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md#verify_blob_kzg_proof_batch)`
-
-1. `verify_kzg_proof()`：验证一个给定的  **KZG 承诺** 的单个证明。
-2. `verify_blob_kzg_proof_batch()`：允许批量验证多个 **KZG 承诺** 的证明。
+- [verify_kzg_proof()](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md#verify_kzg_proof)：验证一个给定的  **KZG 承诺** 的单个证明。
+- [verify_blob_kzg_proof_batch()](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md#verify_blob_kzg_proof_batch)：允许批量验证多个 **KZG 承诺** 的证明。
 
 ----
 
@@ -448,9 +445,7 @@ def validate_block(block: Block) -> None:
 
    此方法通过添加一个**版本前缀**和**使用哈希函数**，确保了 KZG 承诺的唯一性和可验证性，同时在数据结构中明确表示了所使用的加密方案版本。
 
-   注明：
-
-   - KZGCommitment：基础类型为 Bytes48，用于以加密安全的方式承诺到一组数据。这里的 Bytes48 指定了承诺的存储格式。执行“KeyValidate”检查确保了这个承诺是有效的 BLS 密钥（即这个 KZG 承诺有效且安全）。允许身份点意味着在特定的加密操作中，零值（或"没有数据"的表示）也被视为有效的承诺。
+`KZGCommitment`：基础类型为`Bytes48`，用于以加密安全的方式承诺到一组数据。这里的`Bytes48` 指定了承诺的存储格式。执行“KeyValidate”检查确保了这个承诺是有效的 **BLS 密钥**（即这个 KZG 承诺有效且安全）。允许身份点意味着在特定的加密操作中，**零值**（或"没有数据"）也被视为有效的承诺。
 
 2. {**fake_exponential**}：使用**泰勒展开式**近似以 e 为底的指数计算，从而避免使用浮点数运算。
 
@@ -494,7 +489,7 @@ def validate_block(block: Block) -> None:
 - PBS（提议者/构建者分离），以避免要求单个验证者在一个**时隙**（slot）中处理 32 MB 的数据
 - 每个验证者的托管证明或类似的协议内要求，以验证每个块中分片数据的特定部分
 
-该 EIP 还为长期**协议清理（protocol cleanups）**奠定了基础。例如，其（更清洁的）gas **基础费**更新规则可以应用于主要**基础费**计算。
+该 EIP 还为长期**协议清理**（protocol cleanups）奠定了基础。例如，其（更清洁的）gas 基础费更新规则可以应用于主要基础费计算。
 
 ---
 
@@ -503,18 +498,19 @@ def validate_block(block: Block) -> None:
 Rollup 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 Rollup 块的提交者将这些数据放入 `blob` 中。这保证了可用性且比 `calldata` 便宜得多。 Rollup 需要数据至少**可用一次**，且时间足够长，以确保诚实的参与者可以构建 rollup 状态，但不是永远可用。
 
 - **Optimistic Rollups** 只需要在提交*欺诈证明* 时实际提供基础数据。*欺诈证明* 可以以较小的步骤验证*转换*，通过 `calldata` 一次最多加载 `blob` 的几个值。对于每个值，它将提供 ***KZG proof***，并使用**点评估预编译**(point evaluation precompile)来根据之前提交的**版本化哈希**来验证该值，然后像今天一样对该数据执行*欺诈证明* 验证。
+
 - **ZK Rollups** 将为它们的交易或状态增量数据提供两个承诺：
-  
-    - **blob 承诺**（协议确保指向可用数据）。
-    - **ZK rollup 自己的承诺**（使用 rollup 内部使用的任何证明系统）。
-    
-    **blob 承诺**和 **ZK rollup 自己的承诺**使用“**等价证明协议**”，使用**点评估预编译**(point evaluation precompile)来证明两个承诺引用相同的数据。
+
+  - **blob 承诺**（协议确保指向可用数据）。
+  - **ZK rollup 自己的承诺**（使用 rollup 内部使用的任何证明系统）。
+
+  **blob 承诺**和 **ZK rollup 自己的承诺**使用“**等价证明协议**”，使用**点评估预编译**(point evaluation precompile)来证明两个承诺引用相同的数据。
 
 ---
 
 ### 3. 版本化哈希 & 预编译返回数据
 
-我们使用**版本化哈希**（而不是承诺）作为*执行层* 中 **blob** 的引用，以确保与未来更改的**前向兼容性**。例如，如果出于量子安全原因我们需要切换到 Merkle 树 + STARK，那么我们将添加一个新版本，允许**点评估预编译**使用新格式。 Rollup 无需对其工作方式进行任何 EVM 级别的更改；**sequencer** 只需在适当的时间切换到使用新的交易类型即可。
+使用**版本化哈希**（而不是承诺）作为*执行层* 中 **blob** 的引用，以确保与未来更改的**前向兼容性**。通过引入一个新的版本标识符，支持新的数据结构或验证方法，允许**点评估预编译**使用新格式。 Rollup 无需对其工作方式进行任何 EVM 级别的更改；**sequencer** 只需在适当的时间切换到使用新的交易类型即可。
 
 然而，**点评估（point evaluation）**发生在有限域内，并且只有在已知字段**模数**（mudulus）的情况下才能很好地定义。智能合约可以包含一个将承诺版本映射到**模数**的表，但这不允许智能合约考虑对未知**模数**的未来升级。通过允许访问 EVM 内部的**模数** ，可以构建智能合约，以便它可以使用未来的承诺和证明，而无需升级。
 
@@ -544,10 +540,7 @@ Rollup 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 
 
 若此 EIP 实施后，理论上每个区块的最大容量比目前的最大容量（30M Gas / 每个 `calldata` 字节 16 Gas = 1.875MB）大 40%（0.75 MB / 1.875MB），理论上不会大幅增加最坏情况下的带宽。合并后，区块时间是静态的，而不是不可预测的泊松分布，为大区块的传播提供了保证的时间段。
 
-即使 `calldata` 容量有限，该 EIP 的**持续负载**也比可降低调用数据成本的替代方案低得多，因为不需要将 **blob** 存储与执行负载一样长的时间。这使得实现这些 **blob** 必须保留至少一段时间的策略成为可能。选择的具体值是 `MIN_EPOCHS_FOR_BLOB_SIDECARS_REQUESTS` 时段，约为 18 天，与建议的（但尚未实施）执行负载历史记录的一年轮换时间相比，延迟要短得多。
-
-
-
+即使 `calldata` 容量有限，该 EIP 的*持续负载*也比可降低 `calldata` 成本的方案要低得多，因为不需要将 **blob** 存储与`calldata`一样长的时间，持续时间为 `MIN_EPOCHS_FOR_BLOB_SIDECARS_REQUESTS` 个时段（epoch），约为 18 天。
 
 
 ## E. 小结
