@@ -22,6 +22,7 @@
 
 <figure>   <img src="https://img.learnblockchain.cn/pics/20240312194518.png" alt="Layer2(OP)交易成本多数来自 Layer1 数据存储">   <figcaption>Layer2(OP)交易成本多数来自 Layer1 数据存储（数据来自 Dune.com）</figcaption> </figure>
 <br>
+
 解决 **Rollup** 本身长期不足的长期解决方案一直是**数据分片**，这将为可用 **Rollups** 的链增加约 16 MB 的专用数据空间。然而，**数据分片**仍需要相当长的时间才能完成实施和部署。
 
 以太坊即将进行的 **Dencun 升级**属于以太坊升级路线图 “**The Surge**” 的一部分，旨在通过 **Proto-Danksharding** 的引⼊，进⼀步提⾼以太坊的交易吞吐量和可扩展性。
@@ -30,6 +31,7 @@
 
 <figure>   <img src="https://img.learnblockchain.cn/pics/20240312194540.jpg" alt="Proto-DankshardingWorkingProcess">   <figcaption>Proto-Dankshanrding 工作原理</figcaption> </figure>
 <br>
+
 此 EIP 通过实现将在**完全分片**中使用的**交易格式**，先行解决数据存储和传输的效率问题，为将来分片带来的数据管理挑战提前做准备，从而提供了一个权宜之计的解决方案。此 EIP 的改进和数据结构能够无缝集成，避免了未来可能需要的大规模重构。
 
 与**完全分片**相比，该 **EIP** 压低了区块可包含的 blob 交易数据存储的指标，相当于每个区块约 0.375 MB 的目标容量大小和约 0.75 MB 的容量上限。
