@@ -14,7 +14,7 @@
 
 ## B. 背景
 
-目前 Rollups 显着降低了许多以太坊用户的费用，但费用依然对于许多用户来说是昂贵的。Rollup 的相对昂贵源自于 Calldata 有限的存储空间和 Layer2 数据对 Layer1 较高的存储需求。Layer2 的交易数据并不需要永久存储于昂贵的以太坊 Layer1 上，显然 Calldata 不适宜作为 layer 交易数据的存储空间。从链上数据可知，目前使用 Layer2 的成本多数来自于 Calldata 数据永久存储成本。
+目前 Rollups 显着降低了许多以太坊用户的费用，但费用依然对于许多用户来说是昂贵的。Rollup 的相对昂贵源自于 Calldata 有限的存储空间和 Layer2 数据对 Layer1 较高的存储需求。Layer2 的交易数据并不需要永久存储于昂贵的以太坊 Layer1 上，显然 Calldata 不适宜作为 Layer2 交易数据的存储空间。从链上数据可知，目前使用 Layer2 的成本多数来自于 Calldata 数据永久存储成本。
 
 <figure>   <img src="https://img.learnblockchain.cn/pics/20240312194453.png" alt="Layer2 使用费用">   <figcaption>Layer2 使用费用（数据来自 l2fees.info）</figcaption> </figure>
 
