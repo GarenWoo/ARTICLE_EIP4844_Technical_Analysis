@@ -144,9 +144,9 @@ blob 交易的发送者对交易数据进行的数字签名，先将 `BLOB_TX_TY
 
 引入 **blob gas** 作为一种新型 gas。它独立于普通 gas 并遵循自己的目标规则（类似于 **EIP-1559**）。
 
-1. **单个 blob 的 gas 容量**由新增常量 `GAS_PER_BLOB` 定义，值为 `2 ** 17`，即 131072 单位个 gas。
-2. **目标 blob gas 消耗量**由新增常量 `TARGET_BLOB_GAS_PER_BLOCK` 定义，对应于 3 个 blob 的 gas 容量，即 `393216` 单位个 gas（3 * `GAS_PER_BLOB`）。
-3. **最大 blob gas 消耗量**由新增常量`MAX_BLOB_GAS_PER_BLOCK` 定义，对应于 6 个 blob 的 gas 容量，即 `786432` 单位个 gas（6 * `GAS_PER_BLOB`）。
+1. **单个 blob 的 gas 容量**由新增常量 `GAS_PER_BLOB` 定义，值为 `2 ** 17`，即 `131072` 单位 gas。
+2. **目标 blob gas 消耗量**由新增常量 `TARGET_BLOB_GAS_PER_BLOCK` 定义，对应于 3 个 blob 的 gas 容量，即 `393216` 单位 gas（3 * `GAS_PER_BLOB`）。
+3. **最大 blob gas 消耗量**由新增常量`MAX_BLOB_GAS_PER_BLOCK` 定义，对应于 6 个 blob 的 gas 容量，即 `786432` 单位 gas（6 * `GAS_PER_BLOB`）。
 
 #### blob 基础费更新规则
 
