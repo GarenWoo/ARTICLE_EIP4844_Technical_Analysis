@@ -1,6 +1,6 @@
 # EIP-4844 背景与技术解读
 
-**前言**：EIP-4844 是以太坊 Dencun 升级中最重要的提案，标志着以太坊在以去中心化方式扩容的道路上迈出了切实而重要的一步。随着 Dencun 升级于 2024.3.13 上线以太坊主网，EIP-4844 也将得到实施。
+**前言**：**EIP-4844** 是以太坊 **Dencun 升级**中最重要的提案，标志着以太坊在以去中心化方式扩容的道路上迈出了切实而重要的一步。随着 **Dencun 升级**于 2024.3.13 上线以太坊主网，**EIP-4844** 也将得到实施。
 
 ## A. 概述
 
@@ -14,7 +14,7 @@
 
 ## B. 背景
 
-目前 Rollups 显着降低了许多以太坊用户的费用，但费用依然对于许多用户来说是昂贵的。Rollup 的**相对昂贵**源自于 calldata 有限的存储空间和 Layer2 数据对 Layer1 较高的存储需求。Layer2 的交易数据并不需要永久存储于昂贵的以太坊 Layer1 上，显然 calldata 不适宜作为 Layer2 交易数据的存储空间。从链上数据可知，目前使用 Layer2 的成本多数来自于 calldata 数据的存储成本。
+目前 Rollups 显著降低了许多以太坊用户的费用，但费用依然对于许多用户来说是昂贵的。Rollups 的**相对昂贵**源于 calldata 有限的存储空间和 Layer2 数据对 Layer1 较高的存储需求。Layer2 的交易数据并不需要永久存储在成本较高的以太坊 Layer1 上，显然 calldata 不适宜作为 Layer2 交易数据的存储空间。从链上数据可知，目前使用 Layer2 的成本主要来源于 calldata 数据的存储成本。
 
 <figure>   <img src="https://img.learnblockchain.cn/pics/20240312194453.png" alt="Layer2 使用费用">   <figcaption>Layer2 使用费用（数据来自 l2fees.info）</figcaption> </figure>
 
@@ -24,7 +24,7 @@
 
 <br>
 
-解决 **Rollup** 本身长期不足的长期解决方案一直是**数据分片**，这将为可用 **Rollups** 的链增加约 16 MB 的专用数据空间。然而，**数据分片**仍需要相当长的时间才能完成实施和部署。
+解决 **Rollups** 本身长期不足的长期解决方案一直是**数据分片**，这将为可用 **Rollups** 的链增加约 16 MB 的专用数据空间。然而，**数据分片**仍需要相当长的时间才能完成实施和部署。
 
 以太坊即将进行的 **Dencun 升级**属于以太坊升级路线图 “**The Surge**” 的一部分，旨在通过 **Proto-Danksharding** 的引⼊，进⼀步提⾼以太坊的交易吞吐量和可扩展性。
 
@@ -271,23 +271,23 @@ def calc_excess_blob_gas(parent: Header) -> int:
 
 ### 7. 点评估预编译
 
-***KZG proof*** 是用于验证一个数据集对应的**KZG 承诺**的正确性的证明（这确保了数据的接收方可以验证数据的发送方实际上承诺了特定的数据集，而无需接收整个数据集本身）。这个 ***KZG Proof*** 声称 **blob**（由**承诺**表示）在**给定点（given point）**评估为**给定值（given value）**，即某个多项式 **`p(x)`**（由一个**承诺**表示）在给定点 **`z`** 上的值 **`p(z)`** 等于 **`y`** 。
+***KZG proof*** 是用于验证一个数据集对应的**KZG 承诺**正确性的证明（这确保了数据的接收方可以验证数据的发送方实际上承诺了特定的数据集，而无需接收整个数据集本身）。这个 ***KZG Proof*** 声称 **blob**（由**承诺**表示）在**给定点**（given point）评估为**给定值**（given value），即某个多项式 **`p(x)`**（由一个**承诺**表示）在给定点 **`z`** 上的值 **`p(z)`** 等于 **`y`** 。
 
-在固定地址为 `POINT_EVALUATION_PRECOMPILE_ADDRESS` （常量，值为 `Bytes20(0x0A)`）预编译合约，实现对 ***KZG Proof*** 的验证 。
+在固定地址 `POINT_EVALUATION_PRECOMPILE_ADDRESS` （常量，值为 `Bytes20(0x0A)`）上预编译合约，实现对 ***KZG Proof*** 的验证 。
 
 预编译的 gas 消耗为 `POINT_EVALUATION_PRECOMPILE_GAS` （本 EIP 新增常量，为固定值 `50000`）。
 
-执行**点评估预编译**的方法 {**point_evaluation_precompile**} 做了 2 件事：
+执行**点评估预编译**的方法 {**point_evaluation_precompile**} 做了两件事：
 
-- 验证：“由给定的 **KZG 承诺** 所计算出的**版本化哈希**（通过新增的 {**kzg_to_versioned_hash**} 方法计算）”是否等于“给定的**版本化哈希**”。
-- 验证：给定的 ***KZG Proof*** 是否有效（通过 [verify_kzg_proof()](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md#verify_kzg_proof) 计算）。
+- **验证**：“由给定的 **KZG 承诺** 所计算出的**版本化哈希**（通过新增的 {**kzg_to_versioned_hash**} 方法计算）”是否等于“给定的**版本化哈希**”。
+- **验证**：给定的 ***KZG Proof*** 是否有效（通过 [verify_kzg_proof()](https://github.com/ethereum/consensus-specs/blob/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb/polynomial-commitments.md#verify_kzg_proof) 计算）。
 
-方法 {**point_evaluation_precompile**} 的唯一参数 input 是一个 bytes 变量，其实际长度应为 192 ，是包含多个参数拼接起来的字节序列，拆分该变量可获得如下参数：
+方法 {**point_evaluation_precompile**} 的唯一参数 `input` 是一个 bytes 变量，其实际长度应为 192 ，是包含多个参数拼接起来的字节序列，拆分该变量可获得如下参数：
 
 - `versioned_hash`（bytes32）：这个 **blob** 的**版本化哈希**
-- `z`（bytes32）：**给定点（given point）**
-- `y`（bytes32）：**给定值（given value）**
-- `commitment`（bytes48）：**KZG 承诺**，作为入参在方法{**kzg_to_versioned_hash**} 中计算出一个**版本化哈希**，并于给定的**版本化哈希** `versioned_hash` 的值做对比。
+- `z`（bytes32）：**给定点**（given point）
+- `y`（bytes32）：**给定值**（given value）
+- `commitment`（bytes48）：**KZG 承诺**，作为入参在方法 {**kzg_to_versioned_hash**} 中计算出一个**版本化哈希**，并于给定的**版本化哈希** `versioned_hash` 的值做对比。
 - `proof`（bytes48）：***KZG Proof***
 
 ```python
@@ -326,9 +326,9 @@ def point_evaluation_precompile(input: Bytes) -> Bytes:
 
 ### 8. 共识层验证
 
-在*共识层*上，**blob** **数据**被引用，但不是编码在**信标区块体**中，而是被作为“***sidecar***”单独传播。
+在*共识层*上，**blob** **数据**被引用，但不是编码在**信标区块体**中，而是被作为**侧车数据**（sidecars）单独传播。
 
-本 EIP 中的“侧车”设计允许 **blob** 数据与**信标区块体**分开传播，使 **blob** **数据**可以独立地被网络中的节点接收和处理。这种“***sidecar***”设计，将 `is_data_available()` 黑盒化，为进一步的数据增加提供了**前向兼容性**：通过**完全分片**，`is_data_available()` 可以被*数据可用性采样 (DAS, data-availability-sampling)* 取代，从而避免所有 **blob** 被所有**信标节点**下载。
+本 EIP 中的“侧车”设计允许 **blob** 数据与**信标区块体**分开传播，使 **blob** **数据**可以独立地被网络中的节点接收和处理。这种**侧车数据**的设计，将 `is_data_available()` 黑盒化，为进一步的数据增加提供了**前向兼容性**：通过**完全分片**，`is_data_available()` 可以被**数据可用性采样** (DAS, data-availability-sampling) 取代，从而避免所有 **blob** 被所有**信标节点**下载。
 
 **数据可用性采样** (DAS, data-availability-sampling)：Danksharding 提出的一个方案，用于实现降低节点负担的同时也保证了数据可用性。其思想是将 blob 中的数据切割成数据碎片，并且让节点由下载 blob 数据转变为随机抽查 blob 数据碎片，让 blob 的数据碎片分散在以太坊的每个节点中，但是完整的 blob 数据却保存在整个以太坊账本中，前提是节点需要足够多且去中心化。
 
@@ -336,7 +336,7 @@ def point_evaluation_precompile(input: Bytes) -> Bytes:
 
 - **信标链**：更新**信标区块**的处理流程，确保 **blob** 可用。
 - **P2P 网络**：在网络中传播和同步更新后的**信标区块**；
-- **诚实验证者**：生成包含 **blob 数据**的**信标链区块**；签署并发布关联的 **blob *sidecar***。
+- **诚实验证者**：生成包含 **blob 数据**的**信标链区块**；签署并发布关联的 **blob 侧车数据**。
 
 ---
 
@@ -480,9 +480,9 @@ def validate_block(block: Block) -> None:
 
 ### 1. 以太坊的分片之路
 
-目前 **rollup** 使用 `calldata`做数据存储。未来，**rollups** 将只能使用**分片数据**（即“**blob**”），因为**分片数据**会便宜得多。
+目前 **Rollups** 使用 `calldata`做数据存储。未来，**Rollups** 将只能使用**分片数据**（即“**blob**”），因为**分片数据**会便宜得多。
 
-以太坊基金会承认 **rollup** 过程中不可避免地要对其处理数据的方式进行一次重大升级，但确保 **rollup** 只需升级一次。相比降低现有的 `calldata` 的 gas 成本，采用**分片数据**（ 即 **blob** ）的格式是目前以太坊扩容的权宜之计。
+以太坊基金会承认 **Rollups** 不可避免地要对其处理数据的方式进行一次重大升级，但确保 **Rollups** 只需升级一次。相比降低现有的 `calldata` 的 gas 成本，采用**分片数据**（ 即 **blob** ）的格式是目前以太坊扩容的权宜之计。
 
 **该 EIP 已经完成的工作包括：**
 
@@ -504,9 +504,9 @@ def validate_block(block: Block) -> None:
 
 ---
 
-### 2. Rollup 如何发挥作用
+### 2. Rollups 如何发挥作用
 
-Rollup 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 Rollup 块的提交者将这些数据放入 `blob` 中。这保证了可用性且比 `calldata` 便宜得多。 Rollup 需要数据至少**可用一次**，且时间足够长，以确保诚实的参与者可以构建 Rollup 状态，但不是永远可用。
+Rollups 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 **Rollup 区块**的提交者将这些数据放入 `blob` 中。这保证了数据可用性且比 `calldata` 便宜得多。 Rollups 需要数据至少**可用一次**，且数据保留足够长的时间，以确保诚实的参与者可以构建 **rollup 状态**，但这些数据不是永续存储且可用。
 
 - **Optimistic Rollups** 只需要在提交*欺诈证明* 时实际提供基础数据。*欺诈证明* 可以以较小的步骤验证*转换*，通过 `calldata` 一次最多加载 `blob` 的几个值。对于每个值，它将提供 ***KZG proof***，并使用**点评估预编译**(point evaluation precompile)来根据之前提交的**版本化哈希**来验证该值，然后像今天一样对该数据执行*欺诈证明* 验证。
 
@@ -521,7 +521,7 @@ Rollup 不会将 **Rollup 区块**的数据放入 `calldata` 中，而是期望 
 
 ### 3. 版本化哈希 & 预编译返回数据
 
-使用**版本化哈希**（而不是承诺）作为*执行层* 中 **blob** 的引用，以确保与未来更改的**前向兼容性**。通过引入一个新的版本标识符，支持新的数据结构或验证方法，允许**点评估预编译**使用新格式。 Rollup 无需对其工作方式进行任何 EVM 级别的更改；**sequencer** 只需在适当的时间切换到使用新的交易类型即可。
+使用**版本化哈希**（而不是承诺）作为*执行层* 中 **blob** 的引用，以确保与未来更改的**前向兼容性**。通过引入一个新的版本标识符，支持新的数据结构或验证方法，允许**点评估预编译**使用新格式。 Rollups 无需对其工作方式进行任何 EVM 级别的更改；**sequencer** 只需在适当的时间切换到使用新的交易类型即可。
 
 然而，**点评估**（point evaluation）发生在有限域内，并且只有在已知字段**模数**（mudulus）的情况下才能很好地定义。智能合约可以包含一个将承诺版本映射到**模数**的表，但这不允许智能合约考虑对未知**模数**的未来升级。通过允许访问 EVM 内部的**模数** ，可以构建智能合约，以便它可以使用未来的承诺和证明，而无需升级。
 
