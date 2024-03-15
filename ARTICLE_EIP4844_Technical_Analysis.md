@@ -566,3 +566,17 @@ EIP-4844 标志着以太坊在解决可扩展性障碍和提高整体网络性�
 > 3.  [ethereum/consensus-specs](https://github.com/ethereum/consensus-specs/tree/86fb82b221474cc89387fa6436806507b3849d88/specs/deneb)
 > 4.  [以太坊坎昆升级详解](https://www.datawallet.com/zh/%E9%9A%90%E8%94%BD%E6%80%A7/ethereum-cancun-upgrade-explained)
 > 5.  [EIP-4844 解释](https://www.datawallet.com/zh/%E9%9A%90%E8%94%BD%E6%80%A7/eip-4844-explained)
+
+
+
+
+
+
+
+--------
+
+**发表地址：https://learnblockchain.cn/article/7586**
+
+**[IPFS Hash](https://ipfs.learnblockchain.cn/bafkreia6tms7knalrhilun7zd5xwekm4qyaqhjpfqynan4akthnhjeifwi)**
+
+**SBT**：https://polygonscan.com/nft/0x6f772e254ef50e9b462915b66404009c73766350/7586
